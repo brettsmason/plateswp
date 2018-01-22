@@ -12,8 +12,10 @@ require 'vendor/autoload.php';
 
 // Add data globally (currently not working)
 $templates = new League\Plates\Engine(get_template_directory() . '/views');
+$templates->addFolder('partials', get_template_directory() . '/views/partials');
+
 $data = [
-	'id'      => get_the_ID(),
+	'id'      => $object_id,
 	'title'   => get_the_title(),
 	'content' => get_post_field( 'post_content', $post_id )
 ];
@@ -103,3 +105,78 @@ function _s_scripts() {
 	wp_enqueue_style( '_s-style', get_stylesheet_uri() );
 }
 add_action( 'wp_enqueue_scripts', '_s_scripts' );
+
+function theme_get_context() {
+	$context = '';
+	$object    = get_queried_object();
+	$object_id = get_queried_object_id();
+
+	// Singular views.
+	if ( is_singular() ) {
+		if ( is_front_page() ) {
+			$context[] = 'front-page';
+		}
+		$context[] = "singular-{$object->post_type}-{$object_id}";
+		$context[] = "singular-{$object->post_type}";
+		$context[] = 'singular';
+	}
+	// Archive views.
+	elseif ( is_archive() ) {
+		if ( is_home() ) {
+			$context[] = 'blog';
+		}
+		// Post type archives.
+		if ( is_post_type_archive() ) {
+			$post_type = get_query_var( 'post_type' );
+			if ( is_array( $post_type ) )
+				reset( $post_type );
+			$context[] = "archive-{$post_type}";
+		}
+		// Taxonomy archives.
+		if ( is_tax() || is_category() || is_tag() ) {
+			$slug = 'post_format' == $object->taxonomy ? str_replace( 'post-format-', '', $object->slug ) : $object->slug;
+			$context[] = "taxonomy-{$object->taxonomy}-" . sanitize_html_class( $slug, $object->term_id );
+			$context[] = "taxonomy-{$object->taxonomy}";
+			$context[] = 'taxonomy';
+		}
+		// User/author archives.
+		if ( is_author() ) {
+			$user_id = get_query_var( 'author' );
+			$context[] = 'user-' . sanitize_html_class( get_the_author_meta( 'user_nicename', $user_id ), $user_id );
+			$context[] = 'user';
+		}
+		// Date archives.
+		if ( is_date() ) {
+			if ( is_year() )
+				$context[] = 'year';
+			if ( is_month() )
+				$context[] = 'month';
+			if ( get_query_var( 'w' ) )
+				$context[] = 'week';
+			if ( is_day() )
+				$context[] = 'day';
+			
+			$context[] = 'date';
+		}
+		// Time archives.
+		if ( is_time() ) {
+			$context[] = 'time';
+			if ( get_query_var( 'hour' ) )
+				$context[] = 'hour';
+			if ( get_query_var( 'minute' ) )
+				$context[] = 'minute';
+		}
+
+		$context[] = 'archive';
+	}
+	// Search results.
+	elseif ( is_search() ) {
+		$context[] = 'search';
+		$context[] = 'archive';
+	}
+	// Error 404 pages.
+	elseif ( is_404() ) {
+		$context[] = '404';
+	}
+	return $context;
+}

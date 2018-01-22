@@ -10,13 +10,13 @@
 
 <body <?php body_class(); ?>>
 
-    <?=$this->insert('partials/header')?>
+    <?=$this->insert('partials::header')?>
 
     <div id="content" class="site-content">
         <?=$this->section('content')?>
     </div><!-- #content -->
 
-    <?=$this->insert('partials/footer')?>
+    <?=$this->insert('partials::footer')?>
 
 <?php wp_footer(); ?>
 
