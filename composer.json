@@ -1,0 +1,12 @@
+{
+    "name": "thenakedcreative/_s-master",
+    "require": {
+        "league/plates": "^3.3"
+    },
+    "authors": [
+        {
+            "name": "Brett Mason",
+            "email": "brettsmason@gmail.com"
+        }
+    ]
+}
