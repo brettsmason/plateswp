@@ -8,6 +8,4 @@
     <div class="entry__content">
         <?=$this->e($content)?>
     </div>
-
-    <?=$this->e($moose)?>
 </article>
